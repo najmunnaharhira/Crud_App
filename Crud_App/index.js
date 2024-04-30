@@ -1,69 +1,169 @@
-// Import required modules
 const express = require("express");
+const fs = require("fs");
 const bodyParser = require("body-parser");
 
-// Create Express app
 const app = express();
+const PORT = process.env.PORT || 4000;
 
-// Middleware
+// Middleware for parsing JSON request bodies
 app.use(bodyParser.json());
 
-// In-memory storage for tasks`
-let tasks = [];
+// Load initial data from JSON file
+let data = JSON.parse(fs.readFileSync("data.json"));
 
-// Routes
-
-// Get all tasks
-app.get("/tasks", (req, res) => {
-  res.json(tasks);
-});
-
-// Create a new task
-app.post("/tasks", (req, res) => {
+// Middleware to validate required fields for POST and PUT requests
+const validateTask_POST_PUT_Method = (req, res, next) => {
   const { title, description, status } = req.body;
-  if (!title || !status) {
-    return res.status(400).json({ error: "Title and status are required" });
-  }
-  const newTask = {
-    id: tasks.length + 1,
-    title,
-    description: description || "",
-    status,
-  };
-  tasks.push(newTask);
-  res.status(201).json(newTask);
-});
 
-// Update a task
-app.put("/tasks/:id", (req, res) => {
-  const taskId = parseInt(req.params.id);
+  // Check if title, description, and status are provided
+  if (!title || !description || !status) {
+    return res
+      .status(400)
+      .json({ message: "Title, description, and status are required" });
+  }
+  next();
+};
+
+// Middleware to validate at least one field for PATCH requests
+const validateTask_PATCH_Method = (req, res, next) => {
   const { title, description, status } = req.body;
-  const taskIndex = tasks.findIndex((task) => task.id === taskId);
-  if (taskIndex === -1) {
-    return res.status(404).json({ error: "Task not found" });
+
+  // Check if at least one of title, description, or status is provided
+  if (!title && !description && !status) {
+    return res
+      .status(400)
+      .json({ message: "Title or description or status is required" });
   }
-  tasks[taskIndex] = {
-    ...tasks[taskIndex],
-    title: title || tasks[taskIndex].title,
-    description: description || tasks[taskIndex].description,
-    status: status || tasks[taskIndex].status,
-  };
-  res.json(tasks[taskIndex]);
+  next();
+};
+
+// Define status rank for sorting
+const statusRank = {
+  "TO DO": 1,
+  "In Progress": 2,
+  Completed: 3,
+};
+
+// GET endpoint to retrieve all tasks
+app.get("/taskList", (req, res) => {
+  try {
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(404).json({ message: "Tasks not found" });
+  }
 });
 
-// Delete a task
-app.delete("/tasks/:id", (req, res) => {
-  const taskId = parseInt(req.params.id);
-  const taskIndex = tasks.findIndex((task) => task.id === taskId);
-  if (taskIndex === -1) {
-    return res.status(404).json({ error: "Task not found" });
+// GET endpoint to retrieve tasks sorted by ID
+app.get("/taskList/sortById", (req, res) => {
+  try {
+    const sortedTasks = data.slice().sort((a, b) => a.id - b.id);
+    res.status(200).json(sortedTasks);
+  } catch (error) {
+    res.status(404).json({ message: "Tasks not found" });
   }
-  tasks.splice(taskIndex, 1);
-  res.sendStatus(204);
+});
+
+// GET endpoint to retrieve tasks sorted by status
+app.get("/taskList/sortByStatus", (req, res) => {
+  try {
+    const sortedTasks = data.sort(
+      (a, b) => statusRank[a.status] - statusRank[b.status]
+    );
+    res.status(200).json(sortedTasks);
+  } catch (error) {
+    res.status(404).json({ message: "Tasks not found" });
+  }
+});
+
+// GET endpoint to search tasks by title or description
+app.get("/taskList/search", (req, res) => {
+  try {
+    const { q } = req.query;
+    const searchResults = data.filter(
+      (task) =>
+        task.title.toLowerCase().includes(q.toLowerCase()) ||
+        task.description.toLowerCase().includes(q.toLowerCase())
+    );
+    res.status(200).json(searchResults);
+  } catch (error) {
+    res.status(404).json({ message: "Tasks not found" });
+  }
+});
+
+// POST endpoint to add a new task
+app.post("/taskList", validateTask_POST_PUT_Method, (req, res) => {
+  try {
+    const newTask = {
+      id: data.length + 1,
+      title: req.body.title,
+      description: req.body.description,
+      status: req.body.status,
+    };
+    data.push(newTask);
+    fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
+    res.status(201).json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to add task" });
+  }
+});
+
+// PUT endpoint to update an existing task
+app.put("/taskList/:id", validateTask_POST_PUT_Method, (req, res) => {
+  try {
+    const taskId = parseInt(req.params.id);
+    const updatedTask = req.body;
+    const taskIndex = data.findIndex((task) => task.id === taskId);
+
+    if (taskIndex !== -1) {
+      data[taskIndex] = { ...data[taskIndex], ...updatedTask };
+      fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
+      res.status(200).json(data);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update task" });
+  }
+});
+
+// DELETE endpoint to remove a task
+app.delete("/taskList/:id", (req, res) => {
+  try {
+    const taskId = parseInt(req.params.id);
+    const taskIndex = data.findIndex((task) => task.id === taskId);
+
+    if (taskIndex !== -1) {
+      data.splice(taskIndex, 1);
+      fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
+      res.status(200).json(data);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete task" });
+  }
+});
+
+// PATCH endpoint to partially update a task
+app.patch("/taskList/:id", validateTask_PATCH_Method, (req, res) => {
+  try {
+    const taskId = parseInt(req.params.id);
+    const updates = req.body;
+    const taskIndex = data.findIndex((task) => task.id === taskId);
+
+    if (taskIndex !== -1) {
+      data[taskIndex] = { ...data[taskIndex], ...updates };
+      fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
+      res.status(200).json(data);
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update task" });
+  }
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
