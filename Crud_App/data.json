@@ -40,5 +40,70 @@
     "title": "Plan Party",
     "description": "Send out invitations and organize catering",
     "status": "TO DO"
+  },
+
+  {
+    "id": 8,
+    "title": "Finish Project Proposal",
+    "description": "Draft proposal for upcoming project",
+    "status": "TO DO"
+  },
+  {
+    "id": 9,
+    "title": "Meeting with Client",
+    "description": "Discuss project requirements and timelines",
+    "status": "In Progress"
+  },
+  {
+    "id": 10,
+    "title": "Prepare Presentation",
+    "description": "Create slides for the upcoming team meeting",
+    "status": "TO DO"
+  },
+  {
+    "id": 11,
+    "title": "Review Code",
+    "description": "Review pull requests and provide feedback",
+    "status": "In Progress"
+  },
+  {
+    "id": 12,
+    "title": "Update Website Content",
+    "description": "Add new blog posts and update product pages",
+    "status": "TO DO"
+  },
+  {
+    "id": 13,
+    "title": "Training Session",
+    "description": "Attend training on new software tools",
+    "status": "In Progress"
+  },
+  {
+    "id":14,
+    "title": "Submit Expense Report",
+    "description": "Compile receipts and submit for reimbursement",
+    "status": "Completed"
+  },
+  {
+    "id": 15,
+    "title": "Schedule Team Meeting",
+    "description": "Coordinate availability and set agenda",
+    "status": "TO DO"
+  },
+  {
+    "id": 16,
+    "title": "Review Quarterly Goals",
+    "description": "Assess progress and adjust objectives",
+    "status": "In Progress"
+  },
+  {
+    "id": 17,
+    "title": "Send Weekly Report",
+    "description": "Summarize achievements and plans for the week",
+    "status": "TO DO"
   }
 ]
+
+
+
+
