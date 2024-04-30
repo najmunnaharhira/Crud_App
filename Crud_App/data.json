@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "title": "Read Book",
+    "description": "Finish 'The Great Gatsby'",
+    "status": "In Progress"
+  },
+  {
+    "id": 2,
+    "title": "Plan Vacation",
+    "description": "Research destinations and book flights",
+    "status": "TO DO"
+  },
+  {
+    "id": 3,
+    "title": "Exercise",
+    "description": "30 minutes of cardio",
+    "status": "Completed"
+  },
+  {
+    "id": 4,
+    "title": "Write Report",
+    "description": "Summarize quarterly financial data",
+    "status": "In Progress"
+  },
+  {
+    "id": 5,
+    "title": "Call Mom",
+    "description": "Check in and catch up",
+    "status": "TO DO"
+  },
+  {
+    "id": 6,
+    "title": "Renew Subscription",
+    "description": "Netflix subscription expires next week",
+    "status": "Completed"
+  },
+  {
+    "id": 7,
+    "title": "Plan Party",
+    "description": "Send out invitations and organize catering",
+    "status": "TO DO"
+  }
+]
